@@ -33,7 +33,7 @@ If API behavior changes, API_SPEC.yaml must be updated in the same PR.
 
 ## Transaction Boundary
 
-Transaction boundaries are defined in service classes with `@Transactional`. `AlarmService.create` is transactional.
+Transaction boundaries are defined in service classes with `@Transactional` when a use case requires multiple persistence operations. External HTTP calls must stay outside transactions. `AlarmService.create` calls the Matching service without a transaction and delegates its single insert to `AlarmRepository.save`, which runs in the default Spring Data JPA repository transaction.
 
 ## Exception To HTTP Mapping
 
