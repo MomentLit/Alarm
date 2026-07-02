@@ -1,6 +1,6 @@
 package com.example.alarm.global.util;
 
-import com.example.matching.global.dto.ApiResponse;
+import com.example.alarm.global.dto.ApiResponse;
 
 public class ResponseUtil {
 
