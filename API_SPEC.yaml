@@ -1,0 +1,91 @@
+openapi: 3.0.1
+info:
+  title: Default module
+  description: ''
+  version: 1.0.0
+tags: []
+paths:
+  /alarm/{matching_id}:
+    post:
+      summary: alarmCreate
+      deprecated: false
+      description: ''
+      tags: []
+      parameters:
+        - name: matching_id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: true
+          example: Bearer {{access_token}}
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+              required:
+                - description
+            example:
+              description: ooo님이 매칭 요청을 보냈습니다
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+          headers: {}
+      security: []
+    patch:
+      summary: alarmReadUpdate
+      deprecated: false
+      description: ''
+      tags: []
+      parameters:
+        - name: matching_id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+        - name: Authorization
+          in: header
+          description: ''
+          required: true
+          example: Bearer {{access_token}}
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+      security: []
+components:
+  schemas:
+    alarmCreateRequest:
+      type: object
+      properties:
+        description:
+          type: string
+      required:
+        - description
+  responses: {}
+  securitySchemes: {}
+servers: []
+security: []
