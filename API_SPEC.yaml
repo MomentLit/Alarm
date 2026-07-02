@@ -17,7 +17,8 @@ paths:
           description: ''
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
         - name: Authorization
           in: header
           description: ''
@@ -45,8 +46,63 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: {}
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              example:
+                message: create alarm
+                data: null
           headers: {}
+        '400':
+          description: 요청 바디 검증 실패 (description 누락 또는 공백)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              example:
+                message: '[ERROR: Request/BadRequest] description 공백일 수 없습니다'
+                data: null
+        '403':
+          description: 인증 실패 (Authorization 헤더 누락 또는 유효하지 않은 토큰). 응답 바디 없음.
+        '500':
+          description: 처리되지 않은 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              example:
+                message: '[ERROR: ?/?] 서버 내부 오류가 발생했습니다.'
+                data: null
+        '502':
+          description: 매칭 서비스 내부 API 조회 실패
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              example:
+                message: '[ERROR: Alarm/MatchingClient] 매칭 정보를 조회할 수 없습니다.'
+                data: null
       security: []
     patch:
       summary: alarmReadUpdate

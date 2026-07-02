@@ -1,3 +1,20 @@
 spring:
   application:
     name: Alarm
+
+  datasource:
+    url: "jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?currentSchema=${DB_SCHEMA}"
+    username: "${DB_USERNAME}"
+    password: "${DB_PASSWORD}"
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: "${JPA_DDL_AUTO}"
+    show-sql: true
+
+jwt:
+  secret: "${JWT_SECRET}"
+
+matching-service:
+  base-url: "${MATCHING_SERVICE_BASE_URL:http://localhost:8081}"

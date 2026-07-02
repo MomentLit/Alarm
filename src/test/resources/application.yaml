@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: Alarm
+  datasource:
+    url: jdbc:h2:mem:alarm;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+jwt:
+  secret: test-jwt-secret-key-for-alarm-service-tests-0123456789
+
+matching-service:
+  base-url: http://localhost:8081
