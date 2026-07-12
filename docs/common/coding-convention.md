@@ -2,7 +2,7 @@
 
 ## Current Service Conventions
 
-- Main package: `com.example.auth`
+- Main package: `com.example.alarm`
 - Controller structure: No controller package or route annotations found.
 - Service structure: No service classes found.
 - Repository structure: No repository classes found.
@@ -15,12 +15,13 @@
 - Controller classes use the `*Controller` suffix when controllers exist.
 - Service classes use the `*Service` suffix when services exist.
 - Repository interfaces use the `*Repository` suffix and extend Spring Data repository interfaces when persistence exists.
+- Client classes use the `*Client` suffix and call other services over HTTP; client response DTOs live in `client.dto`.
 - Request DTOs use the `*Request` suffix.
 - Response DTOs use the `*Response` or `*Responses` suffix.
 - Entity classes use domain nouns.
 - Enum names use domain nouns such as role, status, or category.
 - Method names should describe the use case or derived repository query in the existing style.
-- Package names are lowercase and grouped by technical responsibility such as `controller`, `service`, `repository`, `entity`, `dto.request`, `dto.response`, and `global` where those packages exist.
+- Package names are lowercase and grouped by technical responsibility such as `controller`, `service`, `repository`, `entity`, `client`, `client.dto`, `dto.request`, `dto.response`, and `global` where those packages exist.
 
 ## Comment Rules
 

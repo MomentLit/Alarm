@@ -1,6 +1,5 @@
 package com.example.alarm.global.security;
 
-import com.example.matching.entity.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

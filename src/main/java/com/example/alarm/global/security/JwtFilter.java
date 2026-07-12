@@ -1,6 +1,5 @@
 package com.example.alarm.global.security;
 
-import com.example.matching.entity.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

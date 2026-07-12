@@ -1,48 +1,30 @@
 package com.example.alarm.global.exception;
 
-import com.example.matching.global.dto.ApiResponse;
+import com.example.alarm.global.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ApiResponse<String>> badRequestHandleException(BadRequestException e) {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<String>> methodArgumentNotValidHandleException(MethodArgumentNotValidException e) {
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
+                .findFirst()
+                .orElse("잘못된 요청입니다.");
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.fail("[ERROR: Request/BadRequest] " + e.getMessage()));
+                .body(ApiResponse.fail("[ERROR: Request/BadRequest] " + message));
     }
 
-    @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ApiResponse<String>> forbiddenHandleException(ForbiddenException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.fail("[ERROR: Matching/Forbidden] " + e.getMessage()));
-    }
-
-    @ExceptionHandler(MatchingNotFoundException.class)
-    public ResponseEntity<ApiResponse<String>> matchingNotFoundHandleException(MatchingNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.fail("[ERROR: Matching/NotFound] " + e.getMessage()));
-    }
-
-    @ExceptionHandler(InvalidMatchingStateException.class)
-    public ResponseEntity<ApiResponse<String>> invalidMatchingStateHandleException(InvalidMatchingStateException e) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.fail("[ERROR: Matching/InvalidState] " + e.getMessage()));
-    }
-
-    @ExceptionHandler(SpaceClientException.class)
-    public ResponseEntity<ApiResponse<String>> spaceClientHandleException(SpaceClientException e) {
+    @ExceptionHandler(MatchingClientException.class)
+    public ResponseEntity<ApiResponse<String>> matchingClientHandleException(MatchingClientException e) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                .body(ApiResponse.fail("[ERROR: Matching/SpaceClient] " + e.getMessage()));
-    }
-
-    @ExceptionHandler(MatchingException.class)
-    public ResponseEntity<ApiResponse<String>> matchingHandleException(MatchingException e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.fail("[ERROR: Matching/?] " + e.getMessage()));
+                .body(ApiResponse.fail("[ERROR: Alarm/MatchingClient] " + e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
