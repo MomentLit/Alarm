@@ -6,7 +6,7 @@ Alarm
 
 ## Service Responsibility
 
-Alarm creation for matching events. Other services call this API to store an alarm for the matching host, and the receiver is resolved from the Matching service rather than from the caller's token.
+Alarm creation, listing, and read-status update for matching events. Other services call the creation API to store an alarm for the matching host, and the receiver is resolved from the Matching service rather than from the caller's token. End users list their own alarms and mark a single alarm as read using their token.
 
 ## Technology Stack
 
@@ -19,28 +19,30 @@ Alarm creation for matching events. Other services call this API to store an ala
 ## Main Package Structure
 
 - Main package: `com.example.alarm`
-- Controller: AlarmController handles the visible /alarm API.
-- Service: AlarmService resolves the matching host through MatchingClient and persists the alarm. The external lookup runs outside any transaction.
+- Controller: AlarmController handles the visible /alarm APIs (create, list, read update). The authenticated user is taken from `UserPrincipal` via `@AuthenticationPrincipal` for list and read update.
+- Service: AlarmService resolves the matching host through MatchingClient and persists the alarm. The external lookup runs outside any transaction. It also lists the caller's alarms as AlarmResponse and marks a single owned alarm as read inside a `@Transactional` method using entity dirty checking.
 - Repository: AlarmRepository is the persistence boundary.
 - Client: MatchingClient calls the Matching service internal API (`GET /internal/matchings/{matchingId}`) with connect/read timeouts and converts call failures to MatchingClientException. MatchingResponse and MatchingStatus live in `client.dto`.
-- DTO: AlarmCreateRequest is used for creation. ApiResponse<T> built through ResponseUtil wraps controller responses.
+- DTO: AlarmCreateRequest is used for creation. AlarmResponse (`dto.response`) is used for the alarm list. ApiResponse<T> built through ResponseUtil wraps controller responses.
 - Entity/domain: Alarm is a JPA entity mapping the `Matchings_Alarm` table. Role enum exists for security principal roles.
 
 ## Main Domains
 
-Alarm entity storing userId (the matching host, varchar), matchingId, and description by value. MatchingStatus (REQUESTED, APPROVED, REJECTED, CANCELED) exists only as a client DTO field.
+Alarm entity storing userId (the matching host, varchar), matchingId, description, and isRead (`is_read`, defaults to false on creation, set to true by `markAsRead()`). MatchingStatus (REQUESTED, APPROVED, REJECTED, CANCELED) exists only as a client DTO field.
 
 ## Main Features
 
-Alarm creation for a matching. The alarm receiver is the matching `host_id` fetched from the Matching service, not the authenticated caller.
+- Alarm creation for a matching. The alarm receiver is the matching `host_id` fetched from the Matching service, not the authenticated caller.
+- Alarm list for the authenticated user, ordered by id descending.
+- Read update for a single alarm by alarm id. Only the caller's own alarm is updated; a missing or non-owned alarm id is a no-op that still returns 200.
 
 ## Main APIs
 
-Visible API: `POST /alarm/{matching_id}`. Full details are in API_SPEC.yaml. `PATCH /alarm/{matching_id}` (alarmReadUpdate) exists in API_SPEC.yaml but is not implemented yet.
+Visible APIs: `POST /alarm/{matching_id}`, `GET /alarm`, `PATCH /alarm/{alarm_id}` (alarmReadUpdate). Full details are in API_SPEC.yaml.
 
 ## Data Access Structure
 
-AlarmRepository extends JpaRepository<Alarm, Long>. No custom query methods are visible. Matching data is not read from the database; it comes from the Matching service internal API.
+AlarmRepository extends JpaRepository<Alarm, Long> with derived queries `findAllByUserIdOrderByIdDesc(userId)` and `findByIdAndUserId(id, userId)`. Matching data is not read from the database; it comes from the Matching service internal API.
 
 ## Exception Handling
 
@@ -74,5 +76,4 @@ When API behavior changes, `API_SPEC.yaml` must be updated in the same PR.
 
 - MatchingClient timeout values (connect 3s, read 5s) are defaults without a documented SLA.
 - The Matching service internal API contract (`/internal/matchings/{matchingId}` response fields) is confirmed verbally but not documented in a shared spec.
-- `PATCH /alarm/{matching_id}` (alarmReadUpdate) is specified but not implemented; its policy is undefined.
-- Alarm list/read APIs for end users are not defined.
+- The read update no-op policy (200 for a missing or non-owned alarm id) may later need explicit 404/403 handling if the team defines an error policy.

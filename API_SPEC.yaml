@@ -5,6 +5,64 @@ info:
   version: 1.0.0
 tags: []
 paths:
+  /alarm:
+    get:
+      summary: alarmList
+      deprecated: false
+      description: 인증된 사용자 자신에게 온 알람 목록을 id 내림차순으로 조회
+      tags: []
+      parameters:
+        - name: Authorization
+          in: header
+          description: ''
+          required: true
+          example: Bearer {{access_token}}
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/alarmResponse'
+              example:
+                message: get alarms
+                data:
+                  - id: 2
+                    matchingId: 3
+                    description: xxx님이 매칭 요청을 보냈습니다
+                    isRead: false
+                  - id: 1
+                    matchingId: 2
+                    description: ooo님이 매칭 요청을 보냈습니다
+                    isRead: false
+          headers: {}
+        '403':
+          description: 인증 실패 (Authorization 헤더 누락 또는 유효하지 않은 토큰). 응답 바디 없음.
+        '500':
+          description: 처리되지 않은 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              example:
+                message: '[ERROR: ?/?] 서버 내부 오류가 발생했습니다.'
+                data: null
+      security: []
   /alarm/{matching_id}:
     post:
       summary: alarmCreate
@@ -104,18 +162,20 @@ paths:
                 message: '[ERROR: Alarm/MatchingClient] 매칭 정보를 조회할 수 없습니다.'
                 data: null
       security: []
+  /alarm/{alarm_id}:
     patch:
       summary: alarmReadUpdate
       deprecated: false
-      description: ''
+      description: 인증된 사용자 자신에게 온 알람 하나를 알람 id로 읽음 처리. 대상 알람이 없거나 본인 알람이 아니면 변경 없이 200 반환.
       tags: []
       parameters:
-        - name: matching_id
+        - name: alarm_id
           in: path
           description: ''
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
         - name: Authorization
           in: header
           description: ''
@@ -130,7 +190,33 @@ paths:
             application/json:
               schema:
                 type: object
-                properties: {}
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              example:
+                message: update alarm read
+                data: null
+          headers: {}
+        '403':
+          description: 인증 실패 (Authorization 헤더 누락 또는 유효하지 않은 토큰). 응답 바디 없음.
+        '500':
+          description: 처리되지 않은 서버 내부 오류
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    nullable: true
+              example:
+                message: '[ERROR: ?/?] 서버 내부 오류가 발생했습니다.'
+                data: null
       security: []
 components:
   schemas:
@@ -141,6 +227,24 @@ components:
           type: string
       required:
         - description
+    alarmResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        matchingId:
+          type: integer
+          format: int64
+        description:
+          type: string
+        isRead:
+          type: boolean
+      required:
+        - id
+        - matchingId
+        - description
+        - isRead
   responses: {}
   securitySchemes: {}
 servers: []
