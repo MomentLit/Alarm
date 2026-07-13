@@ -4,6 +4,7 @@ import com.example.alarm.client.MatchingClient;
 import com.example.alarm.client.dto.MatchingResponse;
 import com.example.alarm.client.dto.MatchingStatus;
 import com.example.alarm.dto.request.AlarmCreateRequest;
+import com.example.alarm.dto.response.AlarmResponse;
 import com.example.alarm.entity.Alarm;
 import com.example.alarm.global.exception.MatchingClientException;
 import com.example.alarm.repository.AlarmRepository;
@@ -15,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -60,6 +63,48 @@ class AlarmServiceTest {
                 .isInstanceOf(MatchingClientException.class);
 
         verifyNoInteractions(alarmRepository);
+    }
+
+    @Test
+    void getAlarmsReturnsResponsesFromRepository() {
+        when(alarmRepository.findAllByUserIdOrderByIdDesc("1"))
+                .thenReturn(List.of(new Alarm("1", 2L, "ooo님이 매칭 요청을 보냈습니다")));
+
+        List<AlarmResponse> alarms = alarmService.getAlarms("1");
+
+        assertThat(alarms)
+                .singleElement()
+                .satisfies(alarm -> {
+                    assertThat(alarm.matchingId()).isEqualTo(2L);
+                    assertThat(alarm.description()).isEqualTo("ooo님이 매칭 요청을 보냈습니다");
+                    assertThat(alarm.isRead()).isFalse();
+                });
+    }
+
+    @Test
+    void updateReadMarksOwnAlarmAsRead() {
+        Alarm alarm = new Alarm("1", 2L, "ooo님이 매칭 요청을 보냈습니다");
+        when(alarmRepository.findByIdAndUserId(5L, "1")).thenReturn(Optional.of(alarm));
+
+        alarmService.updateRead("1", 5L);
+
+        assertThat(alarm.isRead()).isTrue();
+    }
+
+    @Test
+    void updateReadDoesNothingWhenAlarmNotOwned() {
+        when(alarmRepository.findByIdAndUserId(5L, "1")).thenReturn(Optional.empty());
+
+        alarmService.updateRead("1", 5L);
+    }
+
+    @Test
+    void getAlarmsReturnsEmptyListWhenNoAlarms() {
+        when(alarmRepository.findAllByUserIdOrderByIdDesc("1")).thenReturn(List.of());
+
+        List<AlarmResponse> alarms = alarmService.getAlarms("1");
+
+        assertThat(alarms).isEmpty();
     }
 
     private MatchingResponse matchingResponse(String hostId) {

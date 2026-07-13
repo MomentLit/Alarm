@@ -29,9 +29,17 @@ public class Alarm {
     @Column(nullable = false, columnDefinition = "text")
     private String description;
 
+    @Column(name = "is_read", nullable = false)
+    private boolean isRead;
+
     public Alarm(String userId, Long matchingId, String description) {
         this.userId = userId;
         this.matchingId = matchingId;
         this.description = description;
+        this.isRead = false;
+    }
+
+    public void markAsRead() {
+        this.isRead = true;
     }
 }
